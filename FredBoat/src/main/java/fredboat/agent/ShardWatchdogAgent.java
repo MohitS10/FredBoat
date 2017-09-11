@@ -30,6 +30,7 @@ import fredboat.FredBoat;
 import fredboat.event.ShardWatchdogListener;
 import fredboat.feature.togglz.FeatureFlags;
 import fredboat.shared.constant.DistributionEnum;
+import io.prometheus.client.Counter;
 import net.dv8tion.jda.core.JDA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,11 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class ShardWatchdogAgent extends Thread {
+
+    private static final Counter watchdogRevivesIssued = Counter.build()
+            .name("fredboat_internal_watchdog_revives_issued_total")
+            .help("Total shard revives issued by the watchdog")
+            .register();
 
     private static final Logger log = LoggerFactory.getLogger(ShardWatchdogAgent.class);
     private static final int INTERVAL_MILLIS = 10000; // 10 secs
@@ -96,6 +102,7 @@ public class ShardWatchdogAgent extends Thread {
                         log.error("Got exception while printing thread dump after shard death was detected");
                     }*/
 
+                    watchdogRevivesIssued.inc();
                     shard.revive();
                 }
             }
