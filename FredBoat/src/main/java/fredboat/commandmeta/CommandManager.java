@@ -76,7 +76,9 @@ public class CommandManager {
         Member invoker = context.invoker;
 
         totalCommandsExecuted.inc();
-        commandsExecuted.labels(invoked.getClass().getSimpleName()).inc();
+        if (FeatureFlags.FULL_METRICS.isActive()) {
+            commandsExecuted.labels(invoked.getClass().getSimpleName()).inc();
+        }
 
         if (Config.CONFIG.getDistribution() == DistributionEnum.MAIN
                 && invoked instanceof HelpCommand
